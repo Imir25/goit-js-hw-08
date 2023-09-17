@@ -1,41 +1,39 @@
-import Vimeo from '@vimeo/player';
+import Player from '@vimeo/player';
 import throttle from 'lodash.throttle';
 
-const vimeoPlayer = document.getElementById('vimeo-player');
+const vimeoPlayer = new Player('vimeo-player', {
+  id: 236203659,
+  width: 640,
+});
+
 const storageKey = 'videoPlaybackTime';
 
 const savedTime = localStorage.getItem(storageKey);
 
 if (savedTime !== null) {
-  const player = new Vimeo(vimeoPlayer);
-
-  player.on('loaded', () => {
+  vimeoPlayer.ready().then(() => {
     const seekTime = parseFloat(savedTime);
     if (!isNaN(seekTime)) {
-      player.setCurrentTime(seekTime)
-        .then(function(seconds) {
-          console.log('Seeked to:', seconds);
-        })
-        .catch(function(error) {
-          switch (error.name) {
-            case 'RangeError':
-              console.error('Time was out of range.');
-              break;
-            default:
-              console.error('An error occurred:', error);
-              break;
-          }
-        });
+      vimeoPlayer.setCurrentTime(seekTime).then(function(seconds) {
+        console.log('Seeked to:', seconds);
+      }).catch(function(error) {
+        switch (error.name) {
+          case 'RangeError':
+            console.error('The time was out of range.');
+            break;
+          default:
+            console.error('An error occurred:', error);
+            break;
+        }
+      });
     }
   });
 }
 
-vimeoPlayer.addEventListener('timeupdate', () => {
-  const player = new Vimeo(vimeoPlayer);
-
-  player.getDuration().then(function(duration) {
-    player.getCurrentTime().then(function(currentTime) {
+vimeoPlayer.on('timeupdate', throttle(() => {
+  vimeoPlayer.getDuration().then(function(duration) {
+    vimeoPlayer.getCurrentTime().then(function(currentTime) {
       localStorage.setItem(storageKey, currentTime);
     });
   });
-});
+}, 500));

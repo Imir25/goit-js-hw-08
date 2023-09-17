@@ -22,22 +22,27 @@ function restoreFormState() {
     messageTextarea.value = formState.message;
   }
 }
+
 emailInput.addEventListener('input', saveFormState);
 messageTextarea.addEventListener('input', saveFormState);
 
 window.addEventListener('load', restoreFormState);
 
 form.addEventListener('submit', (event) => {
-  event.preventDefault(); 
+  event.preventDefault();
 
-  const savedFormState = localStorage.getItem(localStorageKey);
-  if (savedFormState) {
-    const formState = JSON.parse(savedFormState);
-    console.log('Submitted Form Data:', formState); 
+  if (emailInput.value && messageTextarea.value) {
+    const formState = {
+      email: emailInput.value,
+      message: messageTextarea.value,
+    };
+    console.log('Submitted Form Data:', formState);
 
     localStorage.removeItem(localStorageKey);
 
     emailInput.value = '';
     messageTextarea.value = '';
+  } else {
+    console.log('Fill in all fields before submitting.');
   }
 });
